@@ -1454,3 +1454,469 @@ input {
   color: #22d3ee;
   font-weight: 900;
 }
+
+/* =========================================
+   EDGE AI TRADER — TRADE SETUP
+   ========================================= */
+
+.trade-setup-panel {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(34, 211, 238, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(12, 18, 30, 0.96),
+      rgba(5, 9, 17, 0.98)
+    );
+  box-shadow:
+    0 18px 55px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.trade-setup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.trade-setup-header h2 {
+  margin: 4px 0 0;
+  color: #f8fafc;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.trade-direction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  background: rgba(34, 211, 238, 0.055);
+  color: #67e8f9;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.trade-direction span {
+  color: #22d3ee;
+  font-size: 9px;
+}
+
+.trade-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trade-level {
+  position: relative;
+  min-height: 105px;
+  padding: 16px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  background: rgba(7, 12, 22, 0.72);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.trade-level:hover {
+  transform: translateY(-2px);
+  background: rgba(12, 20, 34, 0.9);
+}
+
+.trade-level-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+
+.trade-level-label small {
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.trade-level strong {
+  display: block;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Entry */
+
+.trade-level.entry {
+  border-color: rgba(34, 211, 238, 0.22);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 211, 238, 0.075),
+      rgba(7, 12, 22, 0.75)
+    );
+}
+
+.trade-level.entry .trade-level-dot {
+  background: #22d3ee;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.65);
+}
+
+.trade-level.entry strong {
+  color: #67e8f9;
+}
+
+/* Stop Loss */
+
+.trade-level.sl {
+  border-color: rgba(248, 113, 113, 0.24);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(239, 68, 68, 0.075),
+      rgba(7, 12, 22, 0.75)
+    );
+}
+
+.trade-level.sl .trade-level-dot {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.65);
+}
+
+.trade-level.sl strong {
+  color: #f87171;
+}
+
+/* Take Profits */
+
+.trade-level.tp {
+  border-color: rgba(74, 222, 128, 0.22);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 197, 94, 0.075),
+      rgba(7, 12, 22, 0.75)
+    );
+}
+
+.trade-level.tp .trade-level-dot {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.65);
+}
+
+.trade-level.tp strong {
+  color: #4ade80;
+}
+
+/* Risk / Reward */
+
+.trade-level.rr {
+  border-color: rgba(168, 85, 247, 0.22);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(168, 85, 247, 0.075),
+      rgba(7, 12, 22, 0.75)
+    );
+}
+
+.trade-level.rr .trade-level-dot {
+  background: #a855f7;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.65);
+}
+
+.trade-level.rr strong {
+  color: #c084fc;
+}
+
+.trade-level-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+}
+
+
+/* =========================================
+   EDGE AI TRADER — NEWS CALENDAR
+   ========================================= */
+
+.news-panel {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10, 16, 27, 0.96),
+      rgba(5, 9, 17, 0.98)
+    );
+  box-shadow:
+    0 18px 55px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.news-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.news-header h2 {
+  margin: 4px 0 7px;
+  color: #f8fafc;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.timezone-control {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 190px;
+}
+
+.timezone-control label {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.timezone-control select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  border-radius: 9px;
+  outline: none;
+  background: rgba(34, 211, 238, 0.045);
+  color: #67e8f9;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.timezone-control select:focus {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.06);
+}
+
+.timezone-control select option {
+  background: #070a11;
+  color: #e2e8f0;
+}
+
+
+/* News rows */
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.news-row {
+  display: grid;
+  grid-template-columns: 115px 65px minmax(180px, 1fr) minmax(260px, 1.4fr);
+  align-items: center;
+  gap: 15px;
+  padding: 15px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  background: rgba(7, 12, 22, 0.68);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.news-row:hover {
+  transform: translateX(2px);
+  border-color: rgba(34, 211, 238, 0.16);
+  background: rgba(12, 20, 34, 0.88);
+}
+
+.news-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.news-time strong {
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.news-time small {
+  color: #475569;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.news-currency {
+  display: flex;
+  align-items: center;
+}
+
+.news-currency strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 43px;
+  padding: 6px 7px;
+  border-radius: 7px;
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  background: rgba(34, 211, 238, 0.06);
+  color: #67e8f9;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.news-event {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.news-event strong {
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.news-impact {
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.news-impact.high {
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+}
+
+.news-impact.medium {
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(245, 158, 11, 0.08);
+  color: #fbbf24;
+}
+
+.news-impact.low {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.05);
+  color: #94a3b8;
+}
+
+.news-value {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.news-value span {
+  color: #64748b;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.news-value strong {
+  color: #cbd5e1;
+  font-size: 10px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .trade-levels-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .news-row {
+    grid-template-columns: 95px 55px 1fr;
+  }
+
+  .news-value {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 8px;
+    border-top: 1px solid rgba(148, 163, 184, 0.06);
+  }
+}
+
+@media (max-width: 700px) {
+  .trade-setup-panel,
+  .news-panel {
+    padding: 17px;
+    border-radius: 14px;
+  }
+
+  .trade-setup-header,
+  .news-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trade-levels-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .timezone-control {
+    min-width: 0;
+  }
+
+  .news-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .news-event {
+    grid-column: 1 / -1;
+  }
+
+  .news-value {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 430px) {
+  .trade-levels-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-row {
+    grid-template-columns: 1fr;
+  }
+
+  .news-event,
+  .news-value {
+    grid-column: auto;
+  }
+
+  .news-value {
+    justify-content: flex-start;
+  }
+}
