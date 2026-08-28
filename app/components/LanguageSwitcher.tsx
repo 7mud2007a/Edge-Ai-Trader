@@ -18,6 +18,7 @@ export default function LanguageSwitcher() {
   useEffect(() => {
     const saved = localStorage.getItem("edge-language") || "en";
     setLanguage(saved);
+
     document.documentElement.lang = saved;
     document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
   }, []);
@@ -25,6 +26,7 @@ export default function LanguageSwitcher() {
   function changeLanguage(code: string) {
     setLanguage(code);
     localStorage.setItem("edge-language", code);
+
     document.documentElement.lang = code;
     document.documentElement.dir = code === "ar" ? "rtl" : "ltr";
 
@@ -32,16 +34,20 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <select
-      className="language-switcher"
-      value={language}
-      onChange={(e) => changeLanguage(e.target.value)}
-    >
-      {languages.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.name}
-        </option>
-      ))}
-    </select>
+    <div className="language-switcher">
+      <span className="language-icon">◉</span>
+
+      <select
+        value={language}
+        onChange={(e) => changeLanguage(e.target.value)}
+        aria-label="Select language"
+      >
+        {languages.map((lang) => (
+          <option key={lang.code} value={lang.code}>
+            {lang.name}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
