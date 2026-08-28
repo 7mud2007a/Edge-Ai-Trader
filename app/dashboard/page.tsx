@@ -31,6 +31,20 @@ type Analysis = {
   trend: string;
 };
 
+type NewsEvent = {
+  id?: string | number;
+  datetime?: string;
+  date?: string;
+  time?: string;
+  currency?: string;
+  event?: string;
+  title?: string;
+  impact?: string;
+  forecast?: string | number | null;
+  previous?: string | number | null;
+  actual?: string | number | null;
+};
+
 const markets: Market[] = [
   {
     name: "Gold",
@@ -67,6 +81,23 @@ const timeframes = [
   { label: "1D", value: "D", api: "1day" },
 ];
 
+const timezones = [
+  "UTC",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Europe/Rome",
+  "Europe/Istanbul",
+  "Africa/Cairo",
+  "Asia/Riyadh",
+  "Asia/Dubai",
+  "Asia/Tokyo",
+  "Asia/Singapore",
+  "America/New_York",
+  "America/Chicago",
+  "America/Los_Angeles",
+];
+
 const translations: Record<string, any> = {
   en: {
     overview: "Overview",
@@ -84,9 +115,9 @@ const translations: Record<string, any> = {
     ready: "Ready to analyze",
     start: "Refresh Analysis",
     logout: "Logout",
-    news: "MARKET NEWS",
+    news: "FOREX ECONOMIC CALENDAR",
     newsText:
-      "Economic news integration will appear here after the market feed is connected.",
+      "Live economic events, forecasts and previous values.",
     entry: "ENTRY",
     stop: "STOP LOSS",
     tp1: "TAKE PROFIT 1",
@@ -98,6 +129,14 @@ const translations: Record<string, any> = {
     error: "Unable to load live market data.",
     noData: "No market data available.",
     refresh: "Refresh",
+    setup: "TRADE SETUP",
+    timezone: "TIMEZONE",
+    actual: "ACTUAL",
+    forecast: "FORECAST",
+    previous: "PREVIOUS",
+    impact: "IMPACT",
+    noNews: "No upcoming economic events.",
+    loadingNews: "Loading economic calendar...",
   },
 
   ar: {
@@ -115,20 +154,28 @@ const translations: Record<string, any> = {
     ready: "جاهز لتحليل",
     start: "تحديث التحليل",
     logout: "تسجيل الخروج",
-    news: "أخبار السوق",
+    news: "التقويم الاقتصادي للفوركس",
     newsText:
-      "سيتم عرض الأخبار الاقتصادية هنا بعد ربط مصدر الأخبار.",
+      "الأخبار الاقتصادية الحقيقية مع التوقعات والقيم السابقة.",
     entry: "دخول",
     stop: "وقف الخسارة",
-    tp1: "الهدف 1",
-    tp2: "الهدف 2",
-    tp3: "الهدف 3",
+    tp1: "جني الأرباح 1",
+    tp2: "جني الأرباح 2",
+    tp3: "جني الأرباح 3",
     rr: "المخاطرة / العائد",
     trend: "الاتجاه",
     loading: "جاري تحليل بيانات السوق الحقيقية...",
     error: "تعذر تحميل بيانات السوق.",
     noData: "لا توجد بيانات سوق متاحة.",
     refresh: "تحديث",
+    setup: "إعداد الصفقة",
+    timezone: "المنطقة الزمنية",
+    actual: "الفعلي",
+    forecast: "المتوقع",
+    previous: "السابق",
+    impact: "التأثير",
+    noNews: "لا توجد أخبار اقتصادية قادمة.",
+    loadingNews: "جاري تحميل التقويم الاقتصادي...",
   },
 
   tr: {
@@ -147,9 +194,9 @@ const translations: Record<string, any> = {
     ready: "Analize hazır",
     start: "Analizi Yenile",
     logout: "Çıkış",
-    news: "PİYASA HABERLERİ",
+    news: "FOREX EKONOMİK TAKVİMİ",
     newsText:
-      "Ekonomik haber entegrasyonu piyasa haber akışı bağlandıktan sonra burada görünecek.",
+      "Gerçek ekonomik haberler, tahminler ve önceki değerler.",
     entry: "GİRİŞ",
     stop: "STOP LOSS",
     tp1: "TAKE PROFIT 1",
@@ -161,6 +208,14 @@ const translations: Record<string, any> = {
     error: "Canlı piyasa verileri yüklenemedi.",
     noData: "Piyasa verisi bulunamadı.",
     refresh: "Yenile",
+    setup: "İŞLEM KURULUMU",
+    timezone: "ZAMAN DİLİMİ",
+    actual: "GERÇEK",
+    forecast: "TAHMİN",
+    previous: "ÖNCEKİ",
+    impact: "ETKİ",
+    noNews: "Yaklaşan ekonomik etkinlik yok.",
+    loadingNews: "Ekonomik takvim yükleniyor...",
   },
 };
 
@@ -173,9 +228,17 @@ export default function Dashboard() {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
+  const [news, setNews] = useState<NewsEvent[]>([]);
+  const [timezone, setTimezone] = useState("UTC");
+
   const [loading, setLoading] = useState(true);
   const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [newsLoading, setNewsLoading] = useState(true);
+
   const [error, setError] = useState("");
+  const [newsError, setNewsError] = useState("");
+
+  const t = translations[language] || translations.en;
 
   useEffect(() => {
     async function loadUser() {
@@ -192,35 +255,55 @@ export default function Dashboard() {
 
     loadUser();
 
-    const saved = localStorage.getItem("edge-language") || "en";
+    const savedLanguage =
+      localStorage.getItem("edge-language") || "en";
 
-    setLanguage(saved);
+    const savedTimezone =
+      localStorage.getItem("edge-timezone") ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "UTC";
 
-    document.documentElement.lang = saved;
-    document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+    setLanguage(savedLanguage);
+
+    setTimezone(
+      timezones.includes(savedTimezone)
+        ? savedTimezone
+        : "UTC"
+    );
+
+    document.documentElement.lang = savedLanguage;
+    document.documentElement.dir =
+      savedLanguage === "ar" ? "rtl" : "ltr";
 
     const updateLanguage = () => {
-      const lang = localStorage.getItem("edge-language") || "en";
+      const lang =
+        localStorage.getItem("edge-language") || "en";
 
       setLanguage(lang);
 
       document.documentElement.lang = lang;
-      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+      document.documentElement.dir =
+        lang === "ar" ? "rtl" : "ltr";
     };
 
-    window.addEventListener("language-change", updateLanguage);
+    window.addEventListener(
+      "language-change",
+      updateLanguage
+    );
 
     return () => {
-      window.removeEventListener("language-change", updateLanguage);
+      window.removeEventListener(
+        "language-change",
+        updateLanguage
+      );
     };
   }, []);
 
-  const t = translations[language] || translations.en;
-
   const currentTimeframe = useMemo(() => {
     return (
-      timeframes.find((item) => item.value === timeframe) ||
-      timeframes.find((item) => item.value === "60")!
+      timeframes.find(
+        (item) => item.value === timeframe
+      ) || timeframes[3]
     );
   }, [timeframe]);
 
@@ -232,7 +315,9 @@ export default function Dashboard() {
       const response = await fetch(
         `/api/market?symbol=${encodeURIComponent(
           market.apiSymbol
-        )}&interval=${encodeURIComponent(currentTimeframe.api)}`,
+        )}&interval=${encodeURIComponent(
+          currentTimeframe.api
+        )}`,
         {
           cache: "no-store",
         }
@@ -241,7 +326,9 @@ export default function Dashboard() {
       const data = await response.json();
 
       if (!response.ok || data.error) {
-        throw new Error(data.error || "Market API error");
+        throw new Error(
+          data.error || "Market API error"
+        );
       }
 
       const values: Candle[] = Array.isArray(data.values)
@@ -265,21 +352,71 @@ export default function Dashboard() {
     }
   }
 
+  async function loadNews() {
+    try {
+      setNewsLoading(true);
+      setNewsError("");
+
+      const response = await fetch(
+        "/api/news?limit=100",
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(
+          data.error || "News API error"
+        );
+      }
+
+      const events = extractEvents(data);
+
+      setNews(events);
+    } catch (err) {
+      console.error(err);
+      setNewsError("Unable to load economic calendar.");
+      setNews([]);
+    } finally {
+      setNewsLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!loading) {
       loadMarketData();
+      loadNews();
     }
-  }, [loading, market.apiSymbol, currentTimeframe.api]);
+  }, [
+    loading,
+    market.apiSymbol,
+    currentTimeframe.api,
+  ]);
 
   useEffect(() => {
     if (loading) return;
 
     const interval = window.setInterval(() => {
       loadMarketData();
-    }, 30000);
+      loadNews();
+    }, 60000);
 
     return () => window.clearInterval(interval);
-  }, [loading, market.apiSymbol, currentTimeframe.api]);
+  }, [
+    loading,
+    market.apiSymbol,
+    currentTimeframe.api,
+  ]);
+
+  function changeTimezone(value: string) {
+    setTimezone(value);
+    localStorage.setItem(
+      "edge-timezone",
+      value
+    );
+  }
 
   const chartUrl =
     `https://www.tradingview.com/widgetembed/?` +
@@ -311,11 +448,15 @@ export default function Dashboard() {
           <div
             key={i}
             className={`bg-candle ${
-              i % 3 === 0 ? "bearish" : "bullish"
+              i % 3 === 0
+                ? "bearish"
+                : "bullish"
             }`}
             style={{
               left: `${i * 2.7}%`,
-              animationDelay: `${(i % 12) * 0.35}s`,
+              animationDelay: `${
+                (i % 12) * 0.35
+              }s`,
             }}
           >
             <span className="candle-wick" />
@@ -339,26 +480,48 @@ export default function Dashboard() {
         </div>
 
         <div className="sidebar-section">
-          <p className="sidebar-title">WORKSPACE</p>
+          <p className="sidebar-title">
+            WORKSPACE
+          </p>
 
-          <a className="sidebar-link active" href="/dashboard">
+          <a
+            className="sidebar-link active"
+            href="/dashboard"
+          >
             <span>⌂</span>
             {t.overview}
           </a>
 
-          <a className="sidebar-link" href="#chart">
+          <a
+            className="sidebar-link"
+            href="#chart"
+          >
             <span>◈</span>
             {t.analysis}
           </a>
 
-          <a className="sidebar-link" href="#signals">
+          <a
+            className="sidebar-link"
+            href="#signals"
+          >
             <span>↗</span>
             {t.signals}
           </a>
 
-          <a className="sidebar-link" href="#markets">
+          <a
+            className="sidebar-link"
+            href="#markets"
+          >
             <span>▣</span>
             {t.markets}
+          </a>
+
+          <a
+            className="sidebar-link"
+            href="#news"
+          >
+            <span>◷</span>
+            {t.news}
           </a>
         </div>
 
@@ -378,7 +541,8 @@ export default function Dashboard() {
             className="logout-button"
             onClick={async () => {
               await supabase.auth.signOut();
-              window.location.href = "/login";
+              window.location.href =
+                "/login";
             }}
           >
             {t.logout}
@@ -408,12 +572,17 @@ export default function Dashboard() {
           <LanguageSwitcher />
         </header>
 
-        <section className="market-selector" id="markets">
+        <section
+          className="market-selector"
+          id="markets"
+        >
           {markets.map((item) => (
             <button
               key={item.symbol}
               className={`market-selector-card ${
-                market.symbol === item.symbol ? "selected" : ""
+                market.symbol === item.symbol
+                  ? "selected"
+                  : ""
               }`}
               onClick={() => setMarket(item)}
             >
@@ -429,10 +598,15 @@ export default function Dashboard() {
           ))}
         </section>
 
-        <section className="chart-panel" id="chart">
+        <section
+          className="chart-panel"
+          id="chart"
+        >
           <div className="chart-header">
             <div>
-              <p className="panel-kicker">{t.chart}</p>
+              <p className="panel-kicker">
+                {t.chart}
+              </p>
 
               <h2>{market.name}</h2>
 
@@ -450,7 +624,9 @@ export default function Dashboard() {
                       ? "timeframe active"
                       : "timeframe"
                   }
-                  onClick={() => setTimeframe(frame.value)}
+                  onClick={() =>
+                    setTimeframe(frame.value)
+                  }
                 >
                   {frame.label}
                 </button>
@@ -470,17 +646,24 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="analysis-panel" id="signals">
+        <section
+          className="analysis-panel"
+          id="signals"
+        >
           <div className="analysis-header">
             <div>
-              <p className="panel-kicker">{t.engine}</p>
+              <p className="panel-kicker">
+                {t.engine}
+              </p>
 
               <h2>{t.strength}</h2>
             </div>
 
             <div className="analysis-live">
               <span />
-              {analysisLoading ? t.analyzing : "LIVE"}
+              {analysisLoading
+                ? t.analyzing
+                : "LIVE"}
             </div>
           </div>
 
@@ -493,116 +676,222 @@ export default function Dashboard() {
               {error}
             </div>
           ) : analysis ? (
-            <>
-              <div className="signal-grid">
-                <Signal
-                  timeframe={currentTimeframe.label}
-                  value={analysis.strength}
-                  type={analysis.signal}
-                />
+            <div className="signal-grid">
+              <Signal
+                timeframe={currentTimeframe.label}
+                value={analysis.strength}
+                type={analysis.signal}
+              />
 
-                <Signal
-                  timeframe="TREND"
-                  value={analysis.strength}
-                  type={analysis.trend}
-                />
+              <Signal
+                timeframe="TREND"
+                value={analysis.strength}
+                type={analysis.trend}
+              />
 
-                <Signal
-                  timeframe="DATA"
-                  value={Math.min(candles.length, 100)}
-                  type={`${candles.length} CANDLES`}
-                />
-              </div>
-
-              <div className="trade-levels">
-                <TradeLevel
-                  title={t.entry}
-                  value={formatPrice(analysis.entry, market.apiSymbol)}
-                />
-
-                <TradeLevel
-                  title={t.stop}
-                  value={formatPrice(analysis.sl, market.apiSymbol)}
-                />
-
-                <TradeLevel
-                  title={t.tp1}
-                  value={formatPrice(analysis.tp1, market.apiSymbol)}
-                />
-
-                <TradeLevel
-                  title={t.tp2}
-                  value={formatPrice(analysis.tp2, market.apiSymbol)}
-                />
-
-                <TradeLevel
-                  title={t.tp3}
-                  value={formatPrice(analysis.tp3, market.apiSymbol)}
-                />
-
-                <TradeLevel
-                  title={t.rr}
-                  value={analysis.riskReward}
-                />
-              </div>
-            </>
+              <Signal
+                timeframe="DATA"
+                value={Math.min(
+                  candles.length,
+                  100
+                )}
+                type={`${candles.length} CANDLES`}
+              />
+            </div>
           ) : (
             <div className="dashboard-description">
               {t.noData}
             </div>
           )}
-
-          <button
-            className="start-analysis"
-            onClick={loadMarketData}
-            disabled={analysisLoading}
-          >
-            <span>✦</span>
-            {analysisLoading ? t.analyzing : t.refresh}
-          </button>
         </section>
 
-        <section className="analysis-panel">
-          <div className="analysis-header">
+        {analysis && (
+          <section className="trade-setup-panel">
+            <div className="trade-setup-header">
+              <div>
+                <p className="panel-kicker">
+                  {t.setup}
+                </p>
+
+                <h2>
+                  {analysis.signal} ·{" "}
+                  {market.label}
+                </h2>
+              </div>
+
+              <div className="trade-direction">
+                <span>●</span>
+                {analysis.trend}
+              </div>
+            </div>
+
+            <div className="trade-levels-grid">
+              <TradeLevel
+                title={t.entry}
+                value={formatPrice(
+                  analysis.entry,
+                  market.apiSymbol
+                )}
+                type="entry"
+              />
+
+              <TradeLevel
+                title={t.stop}
+                value={formatPrice(
+                  analysis.sl,
+                  market.apiSymbol
+                )}
+                type="sl"
+              />
+
+              <TradeLevel
+                title={t.tp1}
+                value={formatPrice(
+                  analysis.tp1,
+                  market.apiSymbol
+                )}
+                type="tp"
+              />
+
+              <TradeLevel
+                title={t.tp2}
+                value={formatPrice(
+                  analysis.tp2,
+                  market.apiSymbol
+                )}
+                type="tp"
+              />
+
+              <TradeLevel
+                title={t.tp3}
+                value={formatPrice(
+                  analysis.tp3,
+                  market.apiSymbol
+                )}
+                type="tp"
+              />
+
+              <TradeLevel
+                title={t.rr}
+                value={analysis.riskReward}
+                type="rr"
+              />
+            </div>
+          </section>
+        )}
+
+        <section
+          className="news-panel"
+          id="news"
+        >
+          <div className="news-header">
             <div>
-              <p className="panel-kicker">{t.news}</p>
+              <p className="panel-kicker">
+                {t.news}
+              </p>
+
               <h2>{market.name}</h2>
+
+              <p className="dashboard-description">
+                {t.newsText}
+              </p>
+            </div>
+
+            <div className="timezone-control">
+              <label>{t.timezone}</label>
+
+              <select
+                value={timezone}
+                onChange={(e) =>
+                  changeTimezone(
+                    e.target.value
+                  )
+                }
+              >
+                {timezones.map((zone) => (
+                  <option
+                    key={zone}
+                    value={zone}
+                  >
+                    {zone.replace("_", " ")}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <p className="dashboard-description">
-            {t.newsText}
-          </p>
+          {newsLoading ? (
+            <div className="dashboard-description">
+              {t.loadingNews}
+            </div>
+          ) : newsError ? (
+            <div className="dashboard-description">
+              {newsError}
+            </div>
+          ) : news.length === 0 ? (
+            <div className="dashboard-description">
+              {t.noNews}
+            </div>
+          ) : (
+            <div className="news-list">
+              {news.map((item, index) => (
+                <NewsRow
+                  key={
+                    item.id ??
+                    `${item.datetime}-${index}`
+                  }
+                  item={item}
+                  timezone={timezone}
+                  t={t}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="ai-command">
-          <div className="ai-command-icon">✦</div>
+          <div className="ai-command-icon">
+            ✦
+          </div>
 
           <div className="ai-command-text">
-            <p className="panel-kicker">EDGE AI ENGINE</p>
+            <p className="panel-kicker">
+              EDGE AI ENGINE
+            </p>
 
             <h2>
               {t.ready} {market.name}
             </h2>
 
             <p>
-              Live candles are being processed into a technical market view.
+              Live candles and economic events are
+              connected to the dashboard.
             </p>
           </div>
 
           <button
             className="start-analysis"
-            onClick={loadMarketData}
-            disabled={analysisLoading}
+            onClick={() => {
+              loadMarketData();
+              loadNews();
+            }}
+            disabled={
+              analysisLoading ||
+              newsLoading
+            }
           >
             <span>✦</span>
-            {analysisLoading ? t.analyzing : t.start}
+            {analysisLoading
+              ? t.analyzing
+              : t.start}
           </button>
         </section>
 
         <footer className="dashboard-footer">
           <span>EDGE AI TRADER</span>
-          <span>© 2026 · AI Market Intelligence</span>
+          <span>
+            © 2026 · AI Market Intelligence
+          </span>
         </footer>
       </section>
     </main>
@@ -618,8 +907,13 @@ function Signal({
   value: number;
   type: string;
 }) {
-  const isSell = type.includes("SELL") || type === "BEARISH";
-  const isWait = type === "WAIT" || type === "NEUTRAL";
+  const isSell =
+    type.includes("SELL") ||
+    type === "BEARISH";
+
+  const isWait =
+    type === "WAIT" ||
+    type === "NEUTRAL";
 
   return (
     <div className="signal-card">
@@ -640,7 +934,12 @@ function Signal({
               ? "strength-fill wait"
               : "strength-fill buy"
           }
-          style={{ width: `${Math.max(5, Math.min(value, 100))}%` }}
+          style={{
+            width: `${Math.max(
+              5,
+              Math.min(value, 100)
+            )}%`,
+          }}
         />
       </div>
 
@@ -656,7 +955,9 @@ function Signal({
         {type}
       </div>
 
-      <small>Live market calculation</small>
+      <small>
+        Live market calculation
+      </small>
     </div>
   );
 }
@@ -664,19 +965,188 @@ function Signal({
 function TradeLevel({
   title,
   value,
+  type,
 }: {
   title: string;
   value: string;
+  type: "entry" | "sl" | "tp" | "rr";
 }) {
   return (
-    <div className="trade-level-card">
-      <small>{title}</small>
+    <div
+      className={`trade-level ${
+        type
+      }`}
+    >
+      <div className="trade-level-label">
+        <span
+          className="trade-level-dot"
+        />
+
+        <small>{title}</small>
+      </div>
+
       <strong>{value}</strong>
     </div>
   );
 }
 
-function calculateAnalysis(candles: Candle[]): Analysis {
+function NewsRow({
+  item,
+  timezone,
+  t,
+}: {
+  item: NewsEvent;
+  timezone: string;
+  t: any;
+}) {
+  const impact = String(
+    item.impact || ""
+  ).toLowerCase();
+
+  const impactClass =
+    impact.includes("high")
+      ? "high"
+      : impact.includes("medium") ||
+        impact.includes("moderate")
+      ? "medium"
+      : "low";
+
+  return (
+    <article className="news-row">
+      <div className="news-time">
+        <strong>
+          {formatNewsTime(
+            item,
+            timezone
+          )}
+        </strong>
+
+        <small>{timezone}</small>
+      </div>
+
+      <div className="news-currency">
+        <strong>
+          {item.currency || "—"}
+        </strong>
+      </div>
+
+      <div className="news-event">
+        <strong>
+          {item.event ||
+            item.title ||
+            "Economic Event"}
+        </strong>
+
+        <span
+          className={`news-impact ${impactClass}`}
+        >
+          {item.impact || "—"}
+        </span>
+      </div>
+
+      <div className="news-value">
+        <span>
+          {t.actual}:{" "}
+          <strong>
+            {displayValue(
+              item.actual
+            )}
+          </strong>
+        </span>
+
+        <span>
+          {t.forecast}:{" "}
+          <strong>
+            {displayValue(
+              item.forecast
+            )}
+          </strong>
+        </span>
+
+        <span>
+          {t.previous}:{" "}
+          <strong>
+            {displayValue(
+              item.previous
+            )}
+          </strong>
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function extractEvents(data: any): NewsEvent[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.events)) {
+    return data.events;
+  }
+
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+
+  if (Array.isArray(data?.data?.events)) {
+    return data.data.events;
+  }
+
+  if (Array.isArray(data?.results)) {
+    return data.results;
+  }
+
+  return [];
+}
+
+function formatNewsTime(
+  item: NewsEvent,
+  timezone: string
+) {
+  const raw =
+    item.datetime ||
+    item.date ||
+    item.time;
+
+  if (!raw) return "—";
+
+  const date = new Date(raw);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(raw);
+  }
+
+  return new Intl.DateTimeFormat(
+    undefined,
+    {
+      timeZone: timezone,
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }
+  ).format(date);
+}
+
+function displayValue(
+  value: string | number | null | undefined
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "—";
+  }
+
+  return String(value);
+}
+
+function calculateAnalysis(
+  candles: Candle[]
+): Analysis {
   const data = candles
     .map((c) => ({
       open: Number(c.open),
@@ -693,59 +1163,133 @@ function calculateAnalysis(candles: Candle[]): Analysis {
     );
 
   if (data.length < 20) {
-    throw new Error("Not enough candles");
+    throw new Error(
+      "Not enough candles"
+    );
   }
 
-  const closes = data.map((c) => c.close);
+  const closes = data.map(
+    (c) => c.close
+  );
 
-  const current = data[data.length - 1];
-  const previous = data[data.length - 2];
+  const current =
+    data[data.length - 1];
 
-  const ema20 = calculateEMA(closes, 20);
-  const ema50 = calculateEMA(closes, Math.min(50, closes.length));
+  const previous =
+    data[data.length - 2];
 
-  const rsi = calculateRSI(closes, 14);
-  const atr = calculateATR(data, 14);
+  const ema20 = calculateEMA(
+    closes,
+    20
+  );
 
-  const recent = data.slice(-20);
+  const ema50 = calculateEMA(
+    closes,
+    Math.min(
+      50,
+      closes.length
+    )
+  );
 
-  const recentHigh = Math.max(...recent.map((c) => c.high));
-  const recentLow = Math.min(...recent.map((c) => c.low));
+  const rsi = calculateRSI(
+    closes,
+    14
+  );
+
+  const atr = calculateATR(
+    data,
+    14
+  );
+
+  const recent = data.slice(
+    -20
+  );
+
+  const recentHigh =
+    Math.max(
+      ...recent.map(
+        (c) => c.high
+      )
+    );
+
+  const recentLow =
+    Math.min(
+      ...recent.map(
+        (c) => c.low
+      )
+    );
 
   const bullishStructure =
     current.close > ema20 &&
     ema20 > ema50 &&
-    current.close > previous.close;
+    current.close >
+      previous.close;
 
   const bearishStructure =
     current.close < ema20 &&
     ema20 < ema50 &&
-    current.close < previous.close;
+    current.close <
+      previous.close;
 
   let score = 50;
 
-  if (bullishStructure) score += 25;
-  if (bearishStructure) score -= 25;
+  if (bullishStructure)
+    score += 25;
 
-  if (rsi > 55 && rsi < 70) score += 15;
-  if (rsi < 45 && rsi > 30) score -= 15;
+  if (bearishStructure)
+    score -= 25;
 
-  if (current.close > recentHigh * 0.9995) score += 8;
-  if (current.close < recentLow * 1.0005) score -= 8;
+  if (
+    rsi > 55 &&
+    rsi < 70
+  )
+    score += 15;
 
-  score = Math.max(5, Math.min(95, score));
+  if (
+    rsi < 45 &&
+    rsi > 30
+  )
+    score -= 15;
 
-  let signal: "BUY" | "SELL" | "WAIT" = "WAIT";
+  if (
+    current.close >
+    recentHigh * 0.9995
+  )
+    score += 8;
 
-  if (score >= 62) signal = "BUY";
-  if (score <= 38) signal = "SELL";
+  if (
+    current.close <
+    recentLow * 1.0005
+  )
+    score -= 8;
 
-  const entry = current.close;
-
-  const riskDistance = Math.max(
-    atr * 1.25,
-    Math.abs(recentHigh - recentLow) * 0.12
+  score = Math.max(
+    5,
+    Math.min(95, score)
   );
+
+  let signal:
+    | "BUY"
+    | "SELL"
+    | "WAIT" = "WAIT";
+
+  if (score >= 62)
+    signal = "BUY";
+
+  if (score <= 38)
+    signal = "SELL";
+
+  const entry =
+    current.close;
+
+  const riskDistance =
+    Math.max(
+      atr * 1.25,
+      Math.abs(
+        recentHigh -
+          recentLow
+      ) * 0.12
+    );
 
   let sl: number;
   let tp1: number;
@@ -753,25 +1297,60 @@ function calculateAnalysis(candles: Candle[]): Analysis {
   let tp3: number;
 
   if (signal === "SELL") {
-    sl = entry + riskDistance;
-    tp1 = entry - riskDistance * 1.5;
-    tp2 = entry - riskDistance * 2;
-    tp3 = entry - riskDistance * 3;
+    sl =
+      entry +
+      riskDistance;
+
+    tp1 =
+      entry -
+      riskDistance * 1.5;
+
+    tp2 =
+      entry -
+      riskDistance * 2;
+
+    tp3 =
+      entry -
+      riskDistance * 3;
   } else {
-    sl = entry - riskDistance;
-    tp1 = entry + riskDistance * 1.5;
-    tp2 = entry + riskDistance * 2;
-    tp3 = entry + riskDistance * 3;
+    sl =
+      entry -
+      riskDistance;
+
+    tp1 =
+      entry +
+      riskDistance * 1.5;
+
+    tp2 =
+      entry +
+      riskDistance * 2;
+
+    tp3 =
+      entry +
+      riskDistance * 3;
   }
 
-  const reward = Math.abs(tp2 - entry);
-  const risk = Math.abs(entry - sl);
+  const reward =
+    Math.abs(
+      tp2 - entry
+    );
 
-  const rr = risk > 0 ? `1:${(reward / risk).toFixed(2)}` : "—";
+  const risk =
+    Math.abs(
+      entry - sl
+    );
+
+  const rr =
+    risk > 0
+      ? `1:${(
+          reward / risk
+        ).toFixed(2)}`
+      : "—";
 
   return {
     signal,
-    strength: Math.round(score),
+    strength:
+      Math.round(score),
     entry,
     sl,
     tp1,
@@ -787,55 +1366,113 @@ function calculateAnalysis(candles: Candle[]): Analysis {
   };
 }
 
-function calculateEMA(values: number[], period: number) {
-  const multiplier = 2 / (period + 1);
+function calculateEMA(
+  values: number[],
+  period: number
+) {
+  const multiplier =
+    2 / (period + 1);
 
-  let ema = values[0];
+  let ema =
+    values[0];
 
-  for (let i = 1; i < values.length; i++) {
-    ema = (values[i] - ema) * multiplier + ema;
+  for (
+    let i = 1;
+    i < values.length;
+    i++
+  ) {
+    ema =
+      (values[i] - ema) *
+        multiplier +
+      ema;
   }
 
   return ema;
 }
 
-function calculateRSI(values: number[], period: number) {
-  if (values.length <= period) return 50;
+function calculateRSI(
+  values: number[],
+  period: number
+) {
+  if (
+    values.length <= period
+  )
+    return 50;
 
   let gains = 0;
   let losses = 0;
 
-  for (let i = 1; i <= period; i++) {
-    const change = values[i] - values[i - 1];
+  for (
+    let i = 1;
+    i <= period;
+    i++
+  ) {
+    const change =
+      values[i] -
+      values[i - 1];
 
-    if (change >= 0) {
+    if (change >= 0)
       gains += change;
-    } else {
-      losses += Math.abs(change);
-    }
+    else
+      losses += Math.abs(
+        change
+      );
   }
 
-  let averageGain = gains / period;
-  let averageLoss = losses / period;
+  let averageGain =
+    gains / period;
 
-  for (let i = period + 1; i < values.length; i++) {
-    const change = values[i] - values[i - 1];
+  let averageLoss =
+    losses / period;
 
-    const gain = Math.max(change, 0);
-    const loss = Math.max(-change, 0);
+  for (
+    let i = period + 1;
+    i < values.length;
+    i++
+  ) {
+    const change =
+      values[i] -
+      values[i - 1];
+
+    const gain =
+      Math.max(
+        change,
+        0
+      );
+
+    const loss =
+      Math.max(
+        -change,
+        0
+      );
 
     averageGain =
-      (averageGain * (period - 1) + gain) / period;
+      (averageGain *
+        (period - 1) +
+        gain) /
+      period;
 
     averageLoss =
-      (averageLoss * (period - 1) + loss) / period;
+      (averageLoss *
+        (period - 1) +
+        loss) /
+      period;
   }
 
-  if (averageLoss === 0) return 100;
+  if (
+    averageLoss === 0
+  )
+    return 100;
 
-  const rs = averageGain / averageLoss;
+  const rs =
+    averageGain /
+    averageLoss;
 
-  return 100 - 100 / (1 + rs);
+  return (
+    100 -
+    100 /
+      (1 + rs)
+  );
 }
 
 function calculateATR(
@@ -846,39 +1483,85 @@ function calculateATR(
   }[],
   period: number
 ) {
-  const trueRanges: number[] = [];
+  const trueRanges: number[] =
+    [];
 
-  for (let i = 1; i < data.length; i++) {
-    const current = data[i];
-    const previous = data[i - 1];
+  for (
+    let i = 1;
+    i < data.length;
+    i++
+  ) {
+    const current =
+      data[i];
 
-    const tr = Math.max(
-      current.high - current.low,
-      Math.abs(current.high - previous.close),
-      Math.abs(current.low - previous.close)
-    );
+    const previous =
+      data[i - 1];
+
+    const tr =
+      Math.max(
+        current.high -
+          current.low,
+        Math.abs(
+          current.high -
+            previous.close
+        ),
+        Math.abs(
+          current.low -
+            previous.close
+        )
+      );
 
     trueRanges.push(tr);
   }
 
-  if (!trueRanges.length) return 0;
+  if (
+    !trueRanges.length
+  )
+    return 0;
 
-  const recent = trueRanges.slice(-period);
+  const recent =
+    trueRanges.slice(
+      -period
+    );
 
   return (
-    recent.reduce((sum, value) => sum + value, 0) /
+    recent.reduce(
+      (
+        sum,
+        value
+      ) =>
+        sum + value,
+      0
+    ) /
     recent.length
   );
 }
 
-function formatPrice(value: number, symbol: string) {
-  if (symbol.includes("JPY")) {
-    return value.toFixed(3);
+function formatPrice(
+  value: number,
+  symbol: string
+) {
+  if (
+    symbol.includes(
+      "JPY"
+    )
+  ) {
+    return value.toFixed(
+      3
+    );
   }
 
-  if (symbol.includes("XAU")) {
-    return value.toFixed(2);
+  if (
+    symbol.includes(
+      "XAU"
+    )
+  ) {
+    return value.toFixed(
+      2
+    );
   }
 
-  return value.toFixed(5);
+  return value.toFixed(
+    5
+  );
 }
