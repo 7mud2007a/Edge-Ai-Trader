@@ -3,118 +3,117 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
-const translations = {
+const t: Record<string, Record<string, string>> = {
   en: {
     title: "Create Account",
-    subtitle: "Create your account to access the trading workspace.",
+    sub: "Create your account to access the trading workspace.",
     email: "Email",
     password: "Password",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Minimum 6 characters",
     create: "Create Account",
     creating: "Creating account...",
-    haveAccount: "Already have an account?",
+    have: "Already have an account?",
     login: "Login",
     back: "← Back to home",
-    success:
-      "Account created successfully. Check your email if confirmation is required.",
+    success: "Account created successfully. Check your email if confirmation is required.",
   },
-
   ar: {
     title: "إنشاء حساب",
-    subtitle: "أنشئ حسابك للوصول إلى مساحة التداول.",
+    sub: "أنشئ حسابك للوصول إلى مساحة التداول.",
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "6 أحرف على الأقل",
     create: "إنشاء الحساب",
-    creating: "جاري إنشاء الحساب...",
-    haveAccount: "لديك حساب بالفعل؟",
+    creating: "جارٍ إنشاء الحساب...",
+    have: "لديك حساب بالفعل؟",
     login: "تسجيل الدخول",
     back: "← العودة للرئيسية",
-    success:
-      "تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني إذا كان التأكيد مطلوباً.",
+    success: "تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني إذا كان التأكيد مطلوباً.",
   },
-
   tr: {
     title: "Hesap Oluştur",
-    subtitle: "İşlem çalışma alanına erişmek için hesabınızı oluşturun.",
+    sub: "İşlem çalışma alanına erişmek için hesabınızı oluşturun.",
     email: "E-posta",
     password: "Şifre",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "En az 6 karakter",
     create: "Hesap Oluştur",
     creating: "Hesap oluşturuluyor...",
-    haveAccount: "Zaten hesabınız var mı?",
+    have: "Zaten hesabınız var mı?",
     login: "Giriş Yap",
     back: "← Ana sayfaya dön",
-    success:
-      "Hesabınız başarıyla oluşturuldu. Onay gerekiyorsa e-postanızı kontrol edin.",
+    success: "Hesap başarıyla oluşturuldu. Onay gerekiyorsa e-postanızı kontrol edin.",
   },
-
+  de: {
+    title: "Konto erstellen",
+    sub: "Erstellen Sie Ihr Konto, um auf den Trading-Arbeitsbereich zuzugreifen.",
+    email: "E-Mail",
+    password: "Passwort",
+    create: "Konto erstellen",
+    creating: "Konto wird erstellt...",
+    have: "Sie haben bereits ein Konto?",
+    login: "Anmelden",
+    back: "← Zur Startseite",
+    success: "Konto erfolgreich erstellt. Prüfen Sie Ihre E-Mail, falls eine Bestätigung erforderlich ist.",
+  },
   fr: {
     title: "Créer un compte",
-    subtitle: "Créez votre compte pour accéder à votre espace de trading.",
+    sub: "Créez votre compte pour accéder à votre espace de trading.",
     email: "E-mail",
     password: "Mot de passe",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "6 caractères minimum",
     create: "Créer un compte",
     creating: "Création du compte...",
-    haveAccount: "Vous avez déjà un compte ?",
+    have: "Vous avez déjà un compte ?",
     login: "Connexion",
     back: "← Retour à l'accueil",
-    success:
-      "Compte créé avec succès. Vérifiez votre e-mail si une confirmation est requise.",
+    success: "Compte créé avec succès. Vérifiez votre e-mail si une confirmation est requise.",
   },
-
+  es: {
+    title: "Crear cuenta",
+    sub: "Crea tu cuenta para acceder a tu espacio de trading.",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    create: "Crear cuenta",
+    creating: "Creando cuenta...",
+    have: "¿Ya tienes una cuenta?",
+    login: "Iniciar sesión",
+    back: "← Volver al inicio",
+    success: "Cuenta creada correctamente. Revisa tu correo si se requiere confirmación.",
+  },
   pt: {
-    title: "Criar Conta",
-    subtitle: "Crie sua conta para acessar o espaço de trading.",
+    title: "Criar conta",
+    sub: "Crie sua conta para acessar o espaço de trading.",
     email: "E-mail",
     password: "Senha",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Mínimo de 6 caracteres",
-    create: "Criar Conta",
+    create: "Criar conta",
     creating: "Criando conta...",
-    haveAccount: "Já tem uma conta?",
+    have: "Já tem uma conta?",
     login: "Entrar",
     back: "← Voltar ao início",
-    success:
-      "Conta criada com sucesso. Verifique seu e-mail se a confirmação for necessária.",
+    success: "Conta criada com sucesso. Verifique seu e-mail se a confirmação for necessária.",
   },
 };
 
-type Language = keyof typeof translations;
-
 export default function SignupPage() {
-  const [language, setLanguage] = useState<Language>("en");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("edge-language") as Language | null;
-
-    if (saved && translations[saved]) {
+    const updateLanguage = () => {
+      const saved = localStorage.getItem("edge-language") || "en";
       setLanguage(saved);
       document.documentElement.lang = saved;
       document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
-    }
+    };
+
+    updateLanguage();
+    window.addEventListener("language-change", updateLanguage);
+
+    return () =>
+      window.removeEventListener("language-change", updateLanguage);
   }, []);
-
-  const t = translations[language];
-
-  function changeLanguage(value: Language) {
-    setLanguage(value);
-    localStorage.setItem("edge-language", value);
-
-    document.documentElement.lang = value;
-    document.documentElement.dir = value === "ar" ? "rtl" : "ltr";
-  }
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -134,68 +133,50 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage(t.success);
+    setMessage(text.success);
     setLoading(false);
   }
 
+  const text = t[language] || t.en;
+
   return (
     <main className="auth-page">
-
-      <div className="auth-language">
-        <select
-          value={language}
-          onChange={(e) =>
-            changeLanguage(e.target.value as Language)
-          }
-        >
-          <option value="en">English</option>
-          <option value="ar">العربية</option>
-          <option value="tr">Türkçe</option>
-          <option value="fr">Français</option>
-          <option value="pt">Português</option>
-        </select>
-      </div>
-
       <div className="auth-card">
+        <div className="auth-top">
+          <div className="auth-logo">
+            EDGE <span>AI</span> TRADER
+          </div>
 
-        <div className="auth-logo">
-          EDGE <span>AI</span> TRADER
+          <LanguageSwitcher />
         </div>
 
-        <h1>{t.title}</h1>
+        <h1>{text.title}</h1>
 
-        <p className="auth-subtitle">
-          {t.subtitle}
-        </p>
+        <p className="auth-subtitle">{text.sub}</p>
 
         <form onSubmit={handleSignup}>
-
-          <label>{t.email}</label>
+          <label>{text.email}</label>
 
           <input
             type="email"
-            placeholder={t.emailPlaceholder}
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label>{t.password}</label>
+          <label>{text.password}</label>
 
           <input
             type="password"
-            placeholder={t.passwordPlaceholder}
+            placeholder="Minimum 6 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={6}
             required
           />
 
-          {error && (
-            <div className="auth-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="auth-error">{error}</div>}
 
           {message && (
             <div className="auth-success">
@@ -204,22 +185,18 @@ export default function SignupPage() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? t.creating : t.create}
+            {loading ? text.creating : text.create}
           </button>
-
         </form>
 
         <p className="auth-bottom">
-          {t.haveAccount}{" "}
-          <Link href="/login">
-            {t.login}
-          </Link>
+          {text.have}{" "}
+          <Link href="/login">{text.login}</Link>
         </p>
 
         <Link href="/" className="back-home">
-          {t.back}
+          {text.back}
         </Link>
-
       </div>
     </main>
   );
