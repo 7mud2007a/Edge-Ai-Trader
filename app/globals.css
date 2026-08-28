@@ -334,3 +334,13 @@ footer {
     padding: 28px 22px;
   }
 }
+
+.auth-success {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.08);
+  color: #67e8f9;
+  font-size: 13px;
+}
