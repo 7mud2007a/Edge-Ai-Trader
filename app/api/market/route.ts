@@ -16,12 +16,12 @@ export async function GET(request: Request) {
     const symbol = searchParams.get("symbol") || "EUR/USD";
     const interval = searchParams.get("interval") || "1min";
 
-    const params = new URLSearchParams({
-      symbol,
-      interval,
-      outputsize: "100",
-      apikey: apiKey,
-    });
+    const params = new URLSearchParams();
+
+    params.set("symbol", symbol);
+    params.set("interval", interval);
+    params.set("outputsize", "100");
+    params.set("apikey", apiKey);
 
     const response = await fetch(
       `https://api.twelvedata.com/time_series?${params.toString()}`,
@@ -34,7 +34,9 @@ export async function GET(request: Request) {
 
     if (data.status === "error") {
       return NextResponse.json(
-        { error: data.message || "Twelve Data error" },
+        {
+          error: data.message || "Twelve Data error",
+        },
         { status: 400 }
       );
     }
@@ -49,7 +51,9 @@ export async function GET(request: Request) {
     console.error("Market API error:", error);
 
     return NextResponse.json(
-      { error: "Failed to fetch market data" },
+      {
+        error: "Failed to fetch market data",
+      },
       { status: 500 }
     );
   }
