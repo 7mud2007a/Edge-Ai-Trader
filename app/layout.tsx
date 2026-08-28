@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "EDGE AI TRADER",
-  description: "AI-powered Forex market analysis",
+export const metadata = {
+  title: "EDGE AI Trader",
+  description: "AI-Powered Forex Intelligence",
 };
 
 export default function RootLayout({
