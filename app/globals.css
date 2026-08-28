@@ -200,3 +200,137 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(34, 211, 238, 0.08), transparent 35%),
+    #05070d;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  padding: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+}
+
+.auth-logo {
+  margin-bottom: 35px;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.auth-logo span {
+  color: #22d3ee;
+}
+
+.auth-card h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 32px;
+}
+
+.auth-subtitle {
+  margin: 10px 0 30px;
+  text-align: center;
+  color: #8993a4;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-card label {
+  margin: 0 0 8px;
+  color: #d8dee8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-card input {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 14px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  font-size: 15px;
+}
+
+.auth-card input:focus {
+  border-color: #22d3ee;
+}
+
+.auth-card button {
+  margin-top: 5px;
+  padding: 14px;
+  border: 0;
+  border-radius: 9px;
+  background: #22d3ee;
+  color: #031016;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-card button:hover {
+  background: #67e8f9;
+}
+
+.auth-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.08);
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+.auth-bottom {
+  margin: 25px 0 0;
+  text-align: center;
+  color: #8993a4;
+  font-size: 14px;
+}
+
+.auth-bottom a {
+  color: #22d3ee;
+  font-weight: 700;
+}
+
+.back-home {
+  display: block;
+  margin-top: 22px;
+  text-align: center;
+  color: #667085;
+  font-size: 13px;
+}
+
+.back-home:hover {
+  color: #22d3ee;
+}
+
+@media (max-width: 500px) {
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
