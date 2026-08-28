@@ -799,27 +799,56 @@ const [timezoneOpen, setTimezoneOpen] = useState(false);
             </div>
 
             <div className="timezone-control">
-              <label>{t.timezone}</label>
+  <label>{t.timezone}</label>
 
-              <select
-                value={timezone}
-                onChange={(e) =>
-                  changeTimezone(
-                    e.target.value
-                  )
-                }
-              >
-                {timezones.map((zone) => (
-                  <option
-                    key={zone}
-                    value={zone}
-                  >
-                    {zone.replace("_", " ")}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+  <div className="custom-timezone">
+    <button
+      type="button"
+      className="timezone-button"
+      onClick={() =>
+        setTimezoneOpen((prev) => !prev)
+      }
+    >
+      <span className="timezone-icon">◷</span>
+
+      <span className="timezone-current">
+        {timezone.replace("_", " ")}
+      </span>
+
+      <span
+        className={`timezone-arrow ${
+          timezoneOpen ? "open" : ""
+        }`}
+      >
+        ⌄
+      </span>
+    </button>
+
+    {timezoneOpen && (
+      <div className="timezone-menu">
+        {timezones.map((zone) => (
+          <button
+            type="button"
+            key={zone}
+            className={`timezone-option ${
+              timezone === zone ? "active" : ""
+            }`}
+            onClick={() => {
+              changeTimezone(zone);
+              setTimezoneOpen(false);
+            }}
+          >
+            <span className="timezone-option-icon">
+              {timezone === zone ? "✓" : "◷"}
+            </span>
+
+            <span>{zone.replace("_", " ")}</span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
           {newsLoading ? (
             <div className="dashboard-description">
