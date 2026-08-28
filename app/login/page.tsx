@@ -3,99 +3,112 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
-const translations = {
+const t: Record<string, Record<string, string>> = {
   en: {
     title: "Welcome Back",
-    subtitle: "Sign in to your trading workspace.",
+    sub: "Sign in to your trading workspace.",
     email: "Email",
     password: "Password",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Your password",
     login: "Login",
-    loading: "Signing in...",
+    signing: "Signing in...",
     noAccount: "Don't have an account?",
     create: "Create one",
     back: "← Back to home",
   },
   ar: {
-    title: "أهلاً بعودتك",
-    subtitle: "سجّل الدخول إلى مساحة التداول الخاصة بك.",
+    title: "مرحباً بعودتك",
+    sub: "سجّل الدخول إلى مساحة التداول الخاصة بك.",
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "كلمة المرور",
     login: "تسجيل الدخول",
-    loading: "جاري تسجيل الدخول...",
+    signing: "جارٍ تسجيل الدخول...",
     noAccount: "ليس لديك حساب؟",
     create: "إنشاء حساب",
     back: "← العودة للرئيسية",
   },
   tr: {
     title: "Tekrar Hoş Geldiniz",
-    subtitle: "İşlem çalışma alanınıza giriş yapın.",
+    sub: "İşlem çalışma alanınıza giriş yapın.",
     email: "E-posta",
     password: "Şifre",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Şifreniz",
     login: "Giriş Yap",
-    loading: "Giriş yapılıyor...",
+    signing: "Giriş yapılıyor...",
     noAccount: "Hesabınız yok mu?",
     create: "Hesap oluştur",
     back: "← Ana sayfaya dön",
   },
+  de: {
+    title: "Willkommen zurück",
+    sub: "Melden Sie sich bei Ihrem Trading-Arbeitsbereich an.",
+    email: "E-Mail",
+    password: "Passwort",
+    login: "Anmelden",
+    signing: "Anmeldung...",
+    noAccount: "Noch kein Konto?",
+    create: "Konto erstellen",
+    back: "← Zur Startseite",
+  },
   fr: {
-    title: "Bon retour",
-    subtitle: "Connectez-vous à votre espace de trading.",
+    title: "Bon Retour",
+    sub: "Connectez-vous à votre espace de trading.",
     email: "E-mail",
     password: "Mot de passe",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Votre mot de passe",
     login: "Connexion",
-    loading: "Connexion...",
+    signing: "Connexion...",
     noAccount: "Vous n'avez pas de compte ?",
     create: "Créer un compte",
     back: "← Retour à l'accueil",
   },
+  es: {
+    title: "Bienvenido de nuevo",
+    sub: "Inicia sesión en tu espacio de trading.",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    login: "Iniciar sesión",
+    signing: "Iniciando sesión...",
+    noAccount: "¿No tienes una cuenta?",
+    create: "Crear una",
+    back: "← Volver al inicio",
+  },
   pt: {
     title: "Bem-vindo de volta",
-    subtitle: "Entre no seu espaço de trading.",
+    sub: "Entre no seu espaço de trading.",
     email: "E-mail",
     password: "Senha",
-    emailPlaceholder: "you@example.com",
-    passwordPlaceholder: "Sua senha",
     login: "Entrar",
-    loading: "Entrando...",
+    signing: "Entrando...",
     noAccount: "Não tem uma conta?",
-    create: "Criar conta",
+    create: "Criar uma",
     back: "← Voltar ao início",
   },
 };
 
-type Language = keyof typeof translations;
-
 export default function LoginPage() {
-  const [language, setLanguage] = useState<Language>("en");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("edge-language") as Language | null;
-
-    if (saved && translations[saved]) {
+    const updateLanguage = () => {
+      const saved = localStorage.getItem("edge-language") || "en";
       setLanguage(saved);
       document.documentElement.lang = saved;
       document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
-    }
-  }, []);
+    };
 
-  const t = translations[language];
+    updateLanguage();
+    window.addEventListener("language-change", updateLanguage);
+
+    return () =>
+      window.removeEventListener("language-change", updateLanguage);
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-
     setError("");
     setLoading(true);
 
@@ -113,88 +126,58 @@ export default function LoginPage() {
     window.location.href = "/dashboard";
   }
 
-  function changeLanguage(value: Language) {
-    setLanguage(value);
-    localStorage.setItem("edge-language", value);
-    document.documentElement.lang = value;
-    document.documentElement.dir = value === "ar" ? "rtl" : "ltr";
-  }
+  const text = t[language] || t.en;
 
   return (
     <main className="auth-page">
-
-      <div className="auth-language">
-        <select
-          value={language}
-          onChange={(e) =>
-            changeLanguage(e.target.value as Language)
-          }
-        >
-          <option value="en">English</option>
-          <option value="ar">العربية</option>
-          <option value="tr">Türkçe</option>
-          <option value="fr">Français</option>
-          <option value="pt">Português</option>
-        </select>
-      </div>
-
       <div className="auth-card">
+        <div className="auth-top">
+          <div className="auth-logo">
+            EDGE <span>AI</span> TRADER
+          </div>
 
-        <div className="auth-logo">
-          EDGE <span>AI</span> TRADER
+          <LanguageSwitcher />
         </div>
 
-        <h1>{t.title}</h1>
-
-        <p className="auth-subtitle">
-          {t.subtitle}
-        </p>
+        <h1>{text.title}</h1>
+        <p className="auth-subtitle">{text.sub}</p>
 
         <form onSubmit={handleLogin}>
-
-          <label>{t.email}</label>
+          <label>{text.email}</label>
 
           <input
             type="email"
-            placeholder={t.emailPlaceholder}
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label>{t.password}</label>
+          <label>{text.password}</label>
 
           <input
             type="password"
-            placeholder={t.passwordPlaceholder}
+            placeholder="Your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          {error && (
-            <div className="auth-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="auth-error">{error}</div>}
 
           <button type="submit" disabled={loading}>
-            {loading ? t.loading : t.login}
+            {loading ? text.signing : text.login}
           </button>
-
         </form>
 
         <p className="auth-bottom">
-          {t.noAccount}{" "}
-          <Link href="/signup">
-            {t.create}
-          </Link>
+          {text.noAccount}{" "}
+          <Link href="/signup">{text.create}</Link>
         </p>
 
         <Link href="/" className="back-home">
-          {t.back}
+          {text.back}
         </Link>
-
       </div>
     </main>
   );
