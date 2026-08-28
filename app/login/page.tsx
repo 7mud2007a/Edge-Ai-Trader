@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function login(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setMessage("");
+    setError("");
+    setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -18,7 +21,8 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setMessage(error.message);
+      setError(error.message);
+      setLoading(false);
       return;
     }
 
@@ -26,30 +30,50 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>EDGE AI TRADER</h1>
+    <main className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">
+          EDGE <span>AI</span> TRADER
+        </div>
 
-      <form onSubmit={login}>
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <h1>Welcome Back</h1>
+        <p className="auth-subtitle">Sign in to your trading workspace.</p>
 
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <button type="submit">Login</button>
-      </form>
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-      {message && <p>{message}</p>}
+          {error && <div className="auth-error">{error}</div>}
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
+        </form>
+
+        <p className="auth-bottom">
+          Don't have an account?{" "}
+          <Link href="/signup">Create one</Link>
+        </p>
+
+        <Link href="/" className="back-home">
+          ← Back to home
+        </Link>
+      </div>
     </main>
   );
 }
