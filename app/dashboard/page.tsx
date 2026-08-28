@@ -3,225 +3,342 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+const markets = [
+  { name: "Gold", symbol: "OANDA:XAUUSD", label: "XAU / USD" },
+  { name: "EUR / USD", symbol: "OANDA:EURUSD", label: "EUR / USD" },
+  { name: "GBP / USD", symbol: "OANDA:GBPUSD", label: "GBP / USD" },
+  { name: "USD / JPY", symbol: "OANDA:USDJPY", label: "USD / JPY" },
+];
+
+const timeframes = [
+  { label: "1M", value: "1" },
+  { label: "5M", value: "5" },
+  { label: "15M", value: "15" },
+  { label: "1H", value: "60" },
+  { label: "4H", value: "240" },
+  { label: "1D", value: "D" },
+];
+
 export default function Dashboard() {
   const [email, setEmail] = useState("");
+  const [market, setMarket] = useState(markets[0]);
+  const [timeframe, setTimeframe] = useState("60");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser();
+
       if (!data.user) {
         window.location.href = "/login";
         return;
       }
 
       setEmail(data.user.email ?? "");
-    });
+      setLoading(false);
+    }
+
+    loadUser();
   }, []);
 
+  const chartUrl =
+    `https://www.tradingview.com/widgetembed/?` +
+    `symbol=${encodeURIComponent(market.symbol)}` +
+    `&interval=${timeframe}` +
+    `&hidesidetoolbar=1` +
+    `&symboledit=1` +
+    `&saveimage=0` +
+    `&toolbarbg=%2305070d` +
+    `&theme=dark` +
+    `&style=1` +
+    `&timezone=Etc%2FUTC` +
+    `&withdateranges=1` +
+    `&hideideas=1`;
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="loading-orb">AI</div>
+        <p>Loading EDGE AI TRADER...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="dashboard-candles">
-        {Array.from({ length: 32 }).map((_, i) => (
+    <main className="dashboard">
+      {/* Animated background */}
+      <div className="dashboard-background">
+        {Array.from({ length: 38 }).map((_, i) => (
           <div
             key={i}
-            className="bg-candle"
+            className={`bg-candle ${
+              i % 3 === 0 ? "bearish" : "bullish"
+            }`}
             style={{
-              left: `${i * 3.3}%`,
-              animationDelay: `${(i % 8) * 0.45}s`,
+              left: `${i * 2.7}%`,
+              animationDelay: `${(i % 12) * 0.35}s`,
             }}
           >
-            <span className="candle-wick"></span>
-            <span className="candle-body"></span>
+            <span className="candle-wick" />
+            <span className="candle-body" />
           </div>
         ))}
+
+        <div className="background-grid" />
+        <div className="background-glow glow-one" />
+        <div className="background-glow glow-two" />
       </div>
 
-      <main className="dashboard">
-        <aside className="dashboard-sidebar">
-          <div className="dashboard-logo">
-            EDGE <span>AI</span> TRADER
-          </div>
+      {/* Sidebar */}
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-logo">
+          EDGE <span>AI</span> TRADER
+        </div>
 
-          <div className="sidebar-section">
-            <p className="sidebar-title">WORKSPACE</p>
+        <div className="sidebar-status">
+          <span />
+          MARKET ENGINE ONLINE
+        </div>
 
-            <a className="sidebar-link active" href="/dashboard">
-              <span>⌂</span>
-              Overview
-            </a>
+        <div className="sidebar-section">
+          <p className="sidebar-title">WORKSPACE</p>
 
-            <a className="sidebar-link" href="#">
-              <span>◈</span>
-              AI Analysis
-            </a>
+          <a className="sidebar-link active" href="/dashboard">
+            <span>⌂</span>
+            Overview
+          </a>
 
-            <a className="sidebar-link" href="#">
-              <span>↗</span>
-              Market Signals
-            </a>
+          <a className="sidebar-link" href="#chart">
+            <span>◈</span>
+            AI Analysis
+          </a>
 
-            <a className="sidebar-link" href="#">
-              <span>▣</span>
-              Watchlist
-            </a>
-          </div>
+          <a className="sidebar-link" href="#signals">
+            <span>↗</span>
+            Market Signals
+          </a>
 
-          <div className="sidebar-bottom">
-            <div className="account-mini">
-              <div className="account-avatar">
-                {email ? email.charAt(0).toUpperCase() : "U"}
-              </div>
+          <a className="sidebar-link" href="#markets">
+            <span>▣</span>
+            Markets
+          </a>
+        </div>
 
-              <div className="account-info">
-                <strong>Account</strong>
-                <span>{email}</span>
-              </div>
+        <div className="sidebar-bottom">
+          <div className="account-mini">
+            <div className="account-avatar">
+              {email.charAt(0).toUpperCase()}
             </div>
 
+            <div className="account-info">
+              <strong>Account</strong>
+              <span>{email}</span>
+            </div>
+          </div>
+
+          <button
+            className="logout-button"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/login";
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <section className="dashboard-main">
+        <header className="dashboard-header">
+          <div>
+            <p className="dashboard-eyebrow">
+              AI FOREX INTELLIGENCE
+            </p>
+
+            <h1>Market Command Center</h1>
+
+            <p className="dashboard-description">
+              Real-time market visualization and multi-timeframe analysis.
+            </p>
+          </div>
+
+          <div className="status-badge">
+            <span />
+            LIVE MARKET
+          </div>
+        </header>
+
+        {/* Market selector */}
+        <section className="market-selector" id="markets">
+          {markets.map((item) => (
             <button
-              className="logout-button"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/login";
-              }}
+              key={item.symbol}
+              className={`market-selector-card ${
+                market.symbol === item.symbol ? "selected" : ""
+              }`}
+              onClick={() => setMarket(item)}
             >
-              Logout
+              <div className="market-selector-top">
+                <span>{item.name}</span>
+
+                <span className="market-dot" />
+              </div>
+
+              <strong>{item.label}</strong>
+
+              <small>Live chart</small>
             </button>
-          </div>
-        </aside>
+          ))}
+        </section>
 
-        <section className="dashboard-main">
-          <header className="dashboard-header">
+        {/* Chart */}
+        <section className="chart-panel" id="chart">
+          <div className="chart-header">
             <div>
-              <p className="dashboard-eyebrow">
-                AI FOREX INTELLIGENCE
-              </p>
+              <p className="panel-kicker">MARKET CHART</p>
 
-              <h1>Dashboard</h1>
+              <h2>{market.name}</h2>
 
-              <p className="dashboard-description">
-                Welcome back. Your intelligent trading workspace is ready.
-              </p>
+              <span className="chart-subtitle">
+                {market.label} · Candlestick
+              </span>
             </div>
 
-            <div className="status-badge">
-              <span></span>
-              SYSTEM ONLINE
-            </div>
-          </header>
-
-          <div className="market-grid">
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>EUR / USD</span>
-                <span className="market-positive">+0.42%</span>
-              </div>
-
-              <div className="market-price">1.1748</div>
-
-              <div className="market-label">
-                Euro / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>GBP / USD</span>
-                <span className="market-positive">+0.28%</span>
-              </div>
-
-              <div className="market-price">1.3512</div>
-
-              <div className="market-label">
-                British Pound / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>USD / JPY</span>
-                <span className="market-negative">-0.16%</span>
-              </div>
-
-              <div className="market-price">147.82</div>
-
-              <div className="market-label">
-                US Dollar / Japanese Yen
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-content-grid">
-            <div className="panel ai-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">INTELLIGENCE</p>
-                  <h2>AI Market Analysis</h2>
-                </div>
-
-                <div className="ai-indicator">AI</div>
-              </div>
-
-              <div className="ai-empty">
-                <div className="ai-icon">✦</div>
-
-                <h3>Ready to analyze the market</h3>
-
-                <p>
-                  Get intelligent market analysis, technical insights
-                  and structured trading scenarios.
-                </p>
-
-                <button className="primary-action">
-                  Start AI Analysis
+            <div className="timeframes">
+              {timeframes.map((frame) => (
+                <button
+                  key={frame.value}
+                  className={
+                    timeframe === frame.value ? "timeframe active" : "timeframe"
+                  }
+                  onClick={() => setTimeframe(frame.value)}
+                >
+                  {frame.label}
                 </button>
-              </div>
-            </div>
-
-            <div className="panel signals-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">MARKET</p>
-                  <h2>Trading Signals</h2>
-                </div>
-
-                <span className="live-label">LIVE</span>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>EUR/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="neutral">WAIT</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>GBP/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="positive">BUY</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>USD/JPY</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="negative">SELL</b>
-              </div>
+              ))}
             </div>
           </div>
 
-          <div className="dashboard-footer">
-            <span>EDGE AI TRADER</span>
-            <span>© 2026 All rights reserved.</span>
+          <div className="chart-container">
+            <iframe
+              key={`${market.symbol}-${timeframe}`}
+              src={chartUrl}
+              title={`${market.name} live chart`}
+              className="trading-chart"
+              frameBorder="0"
+              allowFullScreen
+            />
           </div>
         </section>
-      </main>
-    </>
+
+        {/* AI Analysis */}
+        <section className="analysis-panel" id="signals">
+          <div className="analysis-header">
+            <div>
+              <p className="panel-kicker">AI SIGNAL ENGINE</p>
+              <h2>Multi-Timeframe Strength</h2>
+            </div>
+
+            <div className="analysis-live">
+              <span />
+              ANALYZING
+            </div>
+          </div>
+
+          <div className="signal-grid">
+            <Signal timeframe="1M" value={54} type="BUY" />
+            <Signal timeframe="5M" value={67} type="BUY" />
+            <Signal timeframe="15M" value={73} type="BUY" />
+            <Signal timeframe="1H" value={81} type="STRONG BUY" />
+            <Signal timeframe="4H" value={62} type="BUY" />
+            <Signal timeframe="1D" value={48} type="WAIT" />
+          </div>
+        </section>
+
+        {/* AI button */}
+        <section className="ai-command">
+          <div className="ai-command-icon">✦</div>
+
+          <div className="ai-command-text">
+            <p className="panel-kicker">EDGE AI ENGINE</p>
+            <h2>Ready to analyze {market.name}</h2>
+            <p>
+              Combine multiple timeframes and technical signals into one
+              structured market view.
+            </p>
+          </div>
+
+          <button
+            className="start-analysis"
+            onClick={() => {
+              alert(
+                "AI Analysis interface is ready. Live signal calculations will be connected next."
+              );
+            }}
+          >
+            <span>✦</span>
+            Start AI Analysis
+          </button>
+        </section>
+
+        <footer className="dashboard-footer">
+          <span>EDGE AI TRADER</span>
+          <span>© 2026 · AI Market Intelligence</span>
+        </footer>
+      </section>
+    </main>
   );
+}
+
+function Signal({
+  timeframe,
+  value,
+  type,
+}: {
+  timeframe: string;
+  value: number;
+  type: string;
+}) {
+  const isSell = type.includes("SELL");
+  const isWait = type === "WAIT";
+
+  return (
+    <div className="signal-card">
+      <div className="signal-card-top">
+        <span>{timeframe}</span>
+
+        <span className="signal-percent">
+          {value}%
+        </span>
+      </div>
+
+      <div className="strength-bar">
+        <div
+          className={
+            isSell
+              ? "strength-fill sell"
+              : isWait
+              ? "strength-fill wait"
+              : "strength-fill buy"
           }
+          style={{ width: `${value}%` }}
+        />
+      </div>
+
+      <div
+        className={
+          isSell
+            ? "signal-result sell-text"
+            : isWait
+            ? "signal-result wait-text"
+            : "signal-result buy-text"
+        }
+      >
+        {type}
+      </div>
+
+      <small>Multi-factor signal</small>
+    </div>
+  );
+}
