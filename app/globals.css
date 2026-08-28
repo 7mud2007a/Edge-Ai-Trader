@@ -1375,3 +1375,82 @@ input {
   background: #070a11;
   color: #e2e8f0;
 }
+
+.language-switcher {
+  position: relative;
+  z-index: 100;
+}
+
+.language-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border: 1px solid rgba(34,211,238,.2);
+  border-radius: 9px;
+  background: rgba(34,211,238,.05);
+  color: #67e8f9;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.language-button:hover {
+  border-color: rgba(34,211,238,.45);
+  background: rgba(34,211,238,.1);
+}
+
+.language-icon {
+  color: #22d3ee;
+}
+
+.language-arrow {
+  color: #64748b;
+  transition: transform .2s ease;
+}
+
+.language-arrow.open {
+  transform: rotate(180deg);
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 145px;
+  padding: 6px;
+  border: 1px solid rgba(34,211,238,.18);
+  border-radius: 11px;
+  background: #070a11;
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.55),
+    0 0 25px rgba(34,211,238,.06);
+  backdrop-filter: blur(20px);
+}
+
+.language-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8b95a7;
+  cursor: pointer;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.language-menu button:hover,
+.language-menu button.active-language {
+  background: rgba(34,211,238,.08);
+  color: #67e8f9;
+}
+
+.language-check {
+  color: #22d3ee;
+  font-weight: 900;
+}
