@@ -1,8 +1,23 @@
+"use client";
+
 import Link from "next/link";
 
 export default function Home() {
   return (
     <main className="home">
+      <div className="language-switcher">
+        <select defaultValue="en">
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+          <option value="tr">Türkçe</option>
+          <option value="fr">Français</option>
+          <option value="pt">Português</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+        </select>
+      </div>
+
       <nav className="navbar">
         <div className="logo">
           EDGE <span>AI</span> TRADER
@@ -13,7 +28,7 @@ export default function Home() {
             Login
           </Link>
 
-          <Link href="/signup" className="btn btn-primary">
+          <Link href="/register" className="btn btn-primary">
             Get Access
           </Link>
         </div>
@@ -34,7 +49,7 @@ export default function Home() {
         </p>
 
         <div className="hero-buttons">
-          <Link href="/signup" className="btn btn-primary btn-large">
+          <Link href="/register" className="btn btn-primary btn-large">
             Get Started
           </Link>
 
