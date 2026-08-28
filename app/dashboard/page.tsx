@@ -229,7 +229,8 @@ export default function Dashboard() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
   const [news, setNews] = useState<NewsEvent[]>([]);
-  const [timezone, setTimezone] = useState("UTC");
+const [timezone, setTimezone] = useState("UTC");
+const [timezoneOpen, setTimezoneOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [analysisLoading, setAnalysisLoading] = useState(false);
