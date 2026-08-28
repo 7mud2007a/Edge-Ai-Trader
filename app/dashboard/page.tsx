@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const markets = [
   { name: "Gold", symbol: "OANDA:XAUUSD", label: "XAU / USD" },
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [market, setMarket] = useState(markets[0]);
   const [timeframe, setTimeframe] = useState("60");
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
     async function loadUser() {
@@ -39,6 +41,24 @@ export default function Dashboard() {
     }
 
     loadUser();
+
+    const saved = localStorage.getItem("edge-language") || "en";
+    setLanguage(saved);
+
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+
+    const updateLanguage = () => {
+      const lang = localStorage.getItem("edge-language") || "en";
+      setLanguage(lang);
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    };
+
+    window.addEventListener("language-change", updateLanguage);
+
+    return () =>
+      window.removeEventListener("language-change", updateLanguage);
   }, []);
 
   const chartUrl =
@@ -55,6 +75,65 @@ export default function Dashboard() {
     `&withdateranges=1` +
     `&hideideas=1`;
 
+  const translations: Record<string, any> = {
+    en: {
+      overview: "Overview",
+      analysis: "AI Analysis",
+      signals: "Market Signals",
+      markets: "Markets",
+      command: "Market Command Center",
+      description: "Real-time market visualization and multi-timeframe analysis.",
+      live: "LIVE MARKET",
+      chart: "MARKET CHART",
+      analyzing: "ANALYZING",
+      strength: "Multi-Timeframe Strength",
+      engine: "AI SIGNAL ENGINE",
+      ready: "Ready to analyze",
+      start: "Start AI Analysis",
+      logout: "Logout",
+      news: "MARKET NEWS",
+      newsText: "Latest trusted news for the selected market will appear here.",
+    },
+    ar: {
+      overview: "نظرة عامة",
+      analysis: "تحليل الذكاء الاصطناعي",
+      signals: "إشارات السوق",
+      markets: "الأسواق",
+      command: "مركز قيادة السوق",
+      description: "عرض مباشر للسوق وتحليل متعدد الفريمات.",
+      live: "السوق مباشر",
+      chart: "شارت السوق",
+      analyzing: "جاري التحليل",
+      strength: "قوة متعددة الفريمات",
+      engine: "محرك إشارات الذكاء الاصطناعي",
+      ready: "جاهز لتحليل",
+      start: "بدء تحليل AI",
+      logout: "تسجيل الخروج",
+      news: "أخبار السوق",
+      newsText: "ستظهر هنا آخر الأخبار الموثوقة الخاصة بالسوق المختار.",
+    },
+    tr: {
+      overview: "Genel Bakış",
+      analysis: "AI Analizi",
+      signals: "Piyasa Sinyalleri",
+      markets: "Piyasalar",
+      command: "Piyasa Komuta Merkezi",
+      description: "Gerçek zamanlı piyasa görünümü ve çoklu zaman dilimi analizi.",
+      live: "CANLI PİYASA",
+      chart: "PİYASA GRAFİĞİ",
+      analyzing: "ANALİZ EDİLİYOR",
+      strength: "Çoklu Zaman Dilimi Gücü",
+      engine: "AI SİNYAL MOTORU",
+      ready: "Analize hazır",
+      start: "AI Analizini Başlat",
+      logout: "Çıkış",
+      news: "PİYASA HABERLERİ",
+      newsText: "Seçilen piyasa için güvenilir güncel haberler burada görünecek.",
+    },
+  };
+
+  const t = translations[language] || translations.en;
+
   if (loading) {
     return (
       <div className="dashboard-loading">
@@ -66,7 +145,6 @@ export default function Dashboard() {
 
   return (
     <main className="dashboard">
-      {/* Animated background */}
       <div className="dashboard-background">
         {Array.from({ length: 38 }).map((_, i) => (
           <div
@@ -89,7 +167,6 @@ export default function Dashboard() {
         <div className="background-glow glow-two" />
       </div>
 
-      {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="dashboard-logo">
           EDGE <span>AI</span> TRADER
@@ -105,22 +182,22 @@ export default function Dashboard() {
 
           <a className="sidebar-link active" href="/dashboard">
             <span>⌂</span>
-            Overview
+            {t.overview}
           </a>
 
           <a className="sidebar-link" href="#chart">
             <span>◈</span>
-            AI Analysis
+            {t.analysis}
           </a>
 
           <a className="sidebar-link" href="#signals">
             <span>↗</span>
-            Market Signals
+            {t.signals}
           </a>
 
           <a className="sidebar-link" href="#markets">
             <span>▣</span>
-            Markets
+            {t.markets}
           </a>
         </div>
 
@@ -143,12 +220,11 @@ export default function Dashboard() {
               window.location.href = "/login";
             }}
           >
-            Logout
+            {t.logout}
           </button>
         </div>
       </aside>
 
-      {/* Main */}
       <section className="dashboard-main">
         <header className="dashboard-header">
           <div>
@@ -156,20 +232,21 @@ export default function Dashboard() {
               AI FOREX INTELLIGENCE
             </p>
 
-            <h1>Market Command Center</h1>
+            <h1>{t.command}</h1>
 
             <p className="dashboard-description">
-              Real-time market visualization and multi-timeframe analysis.
+              {t.description}
             </p>
           </div>
 
           <div className="status-badge">
             <span />
-            LIVE MARKET
+            {t.live}
           </div>
+
+          <LanguageSwitcher />
         </header>
 
-        {/* Market selector */}
         <section className="market-selector" id="markets">
           {markets.map((item) => (
             <button
@@ -181,23 +258,19 @@ export default function Dashboard() {
             >
               <div className="market-selector-top">
                 <span>{item.name}</span>
-
                 <span className="market-dot" />
               </div>
 
               <strong>{item.label}</strong>
-
               <small>Live chart</small>
             </button>
           ))}
         </section>
 
-        {/* Chart */}
         <section className="chart-panel" id="chart">
           <div className="chart-header">
             <div>
-              <p className="panel-kicker">MARKET CHART</p>
-
+              <p className="panel-kicker">{t.chart}</p>
               <h2>{market.name}</h2>
 
               <span className="chart-subtitle">
@@ -210,7 +283,9 @@ export default function Dashboard() {
                 <button
                   key={frame.value}
                   className={
-                    timeframe === frame.value ? "timeframe active" : "timeframe"
+                    timeframe === frame.value
+                      ? "timeframe active"
+                      : "timeframe"
                   }
                   onClick={() => setTimeframe(frame.value)}
                 >
@@ -232,17 +307,16 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* AI Analysis */}
         <section className="analysis-panel" id="signals">
           <div className="analysis-header">
             <div>
-              <p className="panel-kicker">AI SIGNAL ENGINE</p>
-              <h2>Multi-Timeframe Strength</h2>
+              <p className="panel-kicker">{t.engine}</p>
+              <h2>{t.strength}</h2>
             </div>
 
             <div className="analysis-live">
               <span />
-              ANALYZING
+              {t.analyzing}
             </div>
           </div>
 
@@ -256,13 +330,29 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* AI button */}
+        <section className="analysis-panel">
+          <div className="analysis-header">
+            <div>
+              <p className="panel-kicker">{t.news}</p>
+              <h2>{market.name}</h2>
+            </div>
+          </div>
+
+          <p className="dashboard-description">
+            {t.newsText}
+          </p>
+        </section>
+
         <section className="ai-command">
           <div className="ai-command-icon">✦</div>
 
           <div className="ai-command-text">
             <p className="panel-kicker">EDGE AI ENGINE</p>
-            <h2>Ready to analyze {market.name}</h2>
+
+            <h2>
+              {t.ready} {market.name}
+            </h2>
+
             <p>
               Combine multiple timeframes and technical signals into one
               structured market view.
@@ -278,7 +368,7 @@ export default function Dashboard() {
             }}
           >
             <span>✦</span>
-            Start AI Analysis
+            {t.start}
           </button>
         </section>
 
@@ -307,10 +397,7 @@ function Signal({
     <div className="signal-card">
       <div className="signal-card-top">
         <span>{timeframe}</span>
-
-        <span className="signal-percent">
-          {value}%
-        </span>
+        <span className="signal-percent">{value}%</span>
       </div>
 
       <div className="strength-bar">
