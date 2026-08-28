@@ -18,89 +18,171 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#05070d] text-white">
-      <nav className="border-b border-white/10 bg-[#080b12]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <div>
-            <h1 className="text-xl font-bold tracking-[0.2em]">
-              EDGE AI TRADER
-            </h1>
-            <p className="mt-1 text-xs text-gray-500">
-              AI-Powered Forex Intelligence
-            </p>
+    <main className="dashboard">
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-logo">
+          EDGE <span>AI</span> TRADER
+        </div>
+
+        <div className="sidebar-section">
+          <p className="sidebar-title">WORKSPACE</p>
+
+          <a className="sidebar-link active" href="/dashboard">
+            <span>⌂</span>
+            Overview
+          </a>
+
+          <a className="sidebar-link" href="#">
+            <span>◈</span>
+            AI Analysis
+          </a>
+
+          <a className="sidebar-link" href="#">
+            <span>↗</span>
+            Market Signals
+          </a>
+
+          <a className="sidebar-link" href="#">
+            <span>▣</span>
+            Watchlist
+          </a>
+        </div>
+
+        <div className="sidebar-bottom">
+          <div className="account-mini">
+            <div className="account-avatar">
+              {email ? email.charAt(0).toUpperCase() : "U"}
+            </div>
+
+            <div className="account-info">
+              <strong>Account</strong>
+              <span>{email}</span>
+            </div>
           </div>
 
           <button
+            className="logout-button"
             onClick={async () => {
               await supabase.auth.signOut();
               window.location.href = "/login";
             }}
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm text-gray-300 transition hover:bg-white/10"
           >
             Logout
           </button>
         </div>
-      </nav>
+      </aside>
 
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <div className="mb-10">
-          <p className="mb-2 text-sm text-gray-500">Welcome back</p>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {email}
-          </h2>
-          <p className="mt-3 text-gray-400">
-            Your AI Forex intelligence workspace.
-          </p>
+      <section className="dashboard-main">
+        <header className="dashboard-header">
+          <div>
+            <p className="dashboard-eyebrow">AI FOREX INTELLIGENCE</p>
+            <h1>Dashboard</h1>
+            <p className="dashboard-description">
+              Welcome back. Your intelligent trading workspace is ready.
+            </p>
+          </div>
+
+          <div className="status-badge">
+            <span></span>
+            SYSTEM ONLINE
+          </div>
+        </header>
+
+        <div className="market-grid">
+          <div className="market-card">
+            <div className="market-card-top">
+              <span>EUR / USD</span>
+              <span className="market-positive">+0.42%</span>
+            </div>
+            <div className="market-price">1.1748</div>
+            <div className="market-label">Euro / US Dollar</div>
+          </div>
+
+          <div className="market-card">
+            <div className="market-card-top">
+              <span>GBP / USD</span>
+              <span className="market-positive">+0.28%</span>
+            </div>
+            <div className="market-price">1.3512</div>
+            <div className="market-label">British Pound / US Dollar</div>
+          </div>
+
+          <div className="market-card">
+            <div className="market-card-top">
+              <span>USD / JPY</span>
+              <span className="market-negative">-0.16%</span>
+            </div>
+            <div className="market-price">147.82</div>
+            <div className="market-label">US Dollar / Japanese Yen</div>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-[#0b0f18] p-6">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-xl">
-              AI
+        <div className="dashboard-content-grid">
+          <div className="panel ai-panel">
+            <div className="panel-header">
+              <div>
+                <p className="panel-kicker">INTELLIGENCE</p>
+                <h2>AI Market Analysis</h2>
+              </div>
+
+              <div className="ai-indicator">AI</div>
             </div>
-            <h3 className="text-lg font-semibold">AI Market Analysis</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-400">
-              Analyze market conditions with your intelligent trading
-              assistant.
-            </p>
-            <button className="mt-6 w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-gray-200">
-              Start Analysis
-            </button>
+
+            <div className="ai-empty">
+              <div className="ai-icon">✦</div>
+              <h3>Ready to analyze the market</h3>
+              <p>
+                Get intelligent market analysis, technical insights and
+                structured trading scenarios.
+              </p>
+
+              <button className="primary-action">
+                Start AI Analysis
+              </button>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#0b0f18] p-6">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-xl">
-              FX
-            </div>
-            <h3 className="text-lg font-semibold">Trading Intelligence</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-400">
-              Organize your market research, setups and trading decisions
-              in one place.
-            </p>
-            <button className="mt-6 w-full rounded-lg border border-white/10 px-4 py-3 text-sm font-semibold transition hover:bg-white/10">
-              Open Workspace
-            </button>
-          </div>
+          <div className="panel signals-panel">
+            <div className="panel-header">
+              <div>
+                <p className="panel-kicker">MARKET</p>
+                <h2>Trading Signals</h2>
+              </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#0b0f18] p-6">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-xl">
-              PRO
+              <span className="live-label">LIVE</span>
             </div>
-            <h3 className="text-lg font-semibold">Private Access</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-400">
-              Your account is active. Subscription status can be managed
-              from your private workspace.
-            </p>
-            <div className="mt-6 rounded-lg border border-white/10 px-4 py-3 text-center text-sm text-gray-400">
-              Account Active
+
+            <div className="signal-row">
+              <div>
+                <strong>EUR/USD</strong>
+                <span>Market Watch</span>
+              </div>
+              <b className="neutral">WAIT</b>
+            </div>
+
+            <div className="signal-row">
+              <div>
+                <strong>GBP/USD</strong>
+                <span>Market Watch</span>
+              </div>
+              <b className="positive">BUY</b>
+            </div>
+
+            <div className="signal-row">
+              <div>
+                <strong>USD/JPY</strong>
+                <span>Market Watch</span>
+              </div>
+              <b className="negative">SELL</b>
             </div>
           </div>
+        </div>
+
+        <div className="dashboard-footer">
+          <span>EDGE AI TRADER</span>
+          <span>© 2026 All rights reserved.</span>
         </div>
       </section>
-
-      <footer className="border-t border-white/10 px-6 py-6 text-center text-xs text-gray-600">
-        © 2026 EDGE AI TRADER. All rights reserved.
-      </footer>
     </main>
   );
 }
