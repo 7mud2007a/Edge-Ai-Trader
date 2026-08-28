@@ -7,18 +7,14 @@ export default function Dashboard() {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-
+    supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         window.location.href = "/login";
         return;
       }
 
       setEmail(data.user.email ?? "");
-    };
-
-    loadUser();
+    });
   }, []);
 
   return (
@@ -33,8 +29,8 @@ export default function Dashboard() {
               animationDelay: `${(i % 8) * 0.45}s`,
             }}
           >
-            <span className="candle-wick" />
-            <span className="candle-body" />
+            <span className="candle-wick"></span>
+            <span className="candle-body"></span>
           </div>
         ))}
       </div>
@@ -108,7 +104,7 @@ export default function Dashboard() {
             </div>
 
             <div className="status-badge">
-              <span />
+              <span></span>
               SYSTEM ONLINE
             </div>
           </header>
@@ -228,236 +224,4 @@ export default function Dashboard() {
       </main>
     </>
   );
-}
-          <div className="market-grid">
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>EUR / USD</span>
-                <span className="market-positive">+0.42%</span>
-              </div>
-
-              <div className="market-price">1.1748</div>
-
-              <div className="market-label">
-                Euro / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>GBP / USD</span>
-                <span className="market-positive">+0.28%</span>
-              </div>
-
-              <div className="market-price">1.3512</div>
-
-              <div className="market-label">
-                British Pound / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>USD / JPY</span>
-                <span className="market-negative">-0.16%</span>
-              </div>
-
-              <div className="market-price">147.82</div>
-
-              <div className="market-label">
-                US Dollar / Japanese Yen
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-content-grid">
-            <div className="panel ai-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">INTELLIGENCE</p>
-                  <h2>AI Market Analysis</h2>
-                </div>
-
-                <div className="ai-indicator">AI</div>
-              </div>
-
-              <div className="ai-empty">
-                <div className="ai-icon">✦</div>
-
-                <h3>Ready to analyze the market</h3>
-
-                <p>
-                  Get intelligent market analysis, technical insights
-                  and structured trading scenarios.
-                </p>
-
-                <button className="primary-action">
-                  Start AI Analysis
-                </button>
-              </div>
-            </div>
-
-            <div className="panel signals-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">MARKET</p>
-                  <h2>Trading Signals</h2>
-                </div>
-
-                <span className="live-label">LIVE</span>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>EUR/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="neutral">WAIT</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>GBP/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="positive">BUY</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>USD/JPY</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="negative">SELL</b>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-footer">
-            <span>EDGE AI TRADER</span>
-            <span>© 2026 All rights reserved.</span>
-          </div>
-        </section>
-      </main>
-    </>
-  );
-}
-          <div className="market-grid">
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>EUR / USD</span>
-                <span className="market-positive">+0.42%</span>
-              </div>
-
-              <div className="market-price">1.1748</div>
-
-              <div className="market-label">
-                Euro / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>GBP / USD</span>
-                <span className="market-positive">+0.28%</span>
-              </div>
-
-              <div className="market-price">1.3512</div>
-
-              <div className="market-label">
-                British Pound / US Dollar
-              </div>
-            </div>
-
-            <div className="market-card">
-              <div className="market-card-top">
-                <span>USD / JPY</span>
-                <span className="market-negative">-0.16%</span>
-              </div>
-
-              <div className="market-price">147.82</div>
-
-              <div className="market-label">
-                US Dollar / Japanese Yen
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-content-grid">
-            <div className="panel ai-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">INTELLIGENCE</p>
-                  <h2>AI Market Analysis</h2>
-                </div>
-
-                <div className="ai-indicator">AI</div>
-              </div>
-
-              <div className="ai-empty">
-                <div className="ai-icon">✦</div>
-
-                <h3>Ready to analyze the market</h3>
-
-                <p>
-                  Get intelligent market analysis, technical insights
-                  and structured trading scenarios.
-                </p>
-
-                <button className="primary-action">
-                  Start AI Analysis
-                </button>
-              </div>
-            </div>
-
-            <div className="panel signals-panel">
-              <div className="panel-header">
-                <div>
-                  <p className="panel-kicker">MARKET</p>
-                  <h2>Trading Signals</h2>
-                </div>
-
-                <span className="live-label">LIVE</span>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>EUR/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="neutral">WAIT</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>GBP/USD</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="positive">BUY</b>
-              </div>
-
-              <div className="signal-row">
-                <div>
-                  <strong>USD/JPY</strong>
-                  <span>Market Watch</span>
-                </div>
-
-                <b className="negative">SELL</b>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-footer">
-            <span>EDGE AI TRADER</span>
-            <span>© 2026 All rights reserved.</span>
-          </div>
-        </section>
-      </main>
-    </>
-  );
-}
+          }
